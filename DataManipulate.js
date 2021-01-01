@@ -1,11 +1,10 @@
 module.exports = new class DataManipulate {
 
-    static ENCODE_ARRAY = "runtheonsArray"
-    static ENCODE_OBJECT = "runtheonsObject";
+
 
     encode(value) {
-                switch (typeof value) {
-                    case 'object':
+        switch (typeof value) {
+            case 'object':
                 var encoded = {};
                 //For object and array
                 if (Array.isArray(value)) {
@@ -22,13 +21,13 @@ module.exports = new class DataManipulate {
                     this.addEncodeTag(encoded, DataManipulate.ENCODE_OBJECT);
                 }
                 return encoded;
-                    case 'string':
+            case 'string':
                 return this.encodeString(value);
-                    case 'undefined':
+            case 'undefined':
                 return this.encodeUndefined();
-                    case 'boolean':
+            case 'boolean':
                 return this.encodeBoolean(value);
-                    case 'number':
+            case 'number':
                 return this.encodeNumber(value);
         }
     }
@@ -37,6 +36,10 @@ module.exports = new class DataManipulate {
         data['runtheonsManipulate'] = tag;
     }
 
+    static ENCODE = "runtheonsManipulate";
+
+    static ENCODE_ARRAY = "runtheonsArray"
+    static ENCODE_OBJECT = "runtheonsObject";
     static ENCODE_STRING = "S";
     static ENCODE_BOOLEAN = "B";
     static ENCODE_UNDEFINED = "U";
@@ -48,7 +51,7 @@ module.exports = new class DataManipulate {
     }
     encodeBoolean(value) {
         return value + DataManipulate.ENCODE_BOOLEAN;
-                }
+    }
     encodeNumber(value) {
         if (Number.isInteger(value))
             return value + DataManipulate.ENCODE_INTEGER;
@@ -58,15 +61,57 @@ module.exports = new class DataManipulate {
     encodeUndefined() {
         return DataManipulate.ENCODE_UNDEFINED;
     }
-            });
+
+    isObject(data) {
+        if (
+            data[DataManipulate.ENCODE] != undefined &&
+            data[DataManipulate.ENCODE] == DataManipulate.ENCODE_OBJECT
+        ) {
+            return true;
         }
-        addEncodeTag(data);
-        return encoded;
+        return false;
     }
 
-    addEncodeTag(data) {
-        data[DataManipulate.ENCODE_TAG] = "GINOPIPPO";
+    isArray(data) {
+        if (
+            data[DataManipulate.ENCODE] != undefined &&
+            data[DataManipulate.ENCODE] == DataManipulate.ENCODE_ARRAY
+        ) {
+            return true;
+        }
+        return false;
     }
 
+    decode(data) {
+        var decoded = {};
+        if (this.isObject(data)) {
+            Object.keys(data).forEach(k => {
+                if (k != DataManipulate.ENCODE)
+                    decoded[k] = this.decode(data[k]);
+            });
+        } else if (this.isArray(data)) {
+            decoded = [];
+            var i = 0;
+            for (var i = 0; i < Object.keys(data).length - 1; i++) {
+                decoded.push(this.decode(data[i]));
+            }
+        } else {
+            var char = data.charAt(data.length - 1);
+            var value = data.slice(0, -1);
+            switch (char) {
+                case DataManipulate.ENCODE_STRING:
+                    return value;
+                case DataManipulate.ENCODE_INTEGER:
+                    return parseInt(value);
+                case DataManipulate.ENCODE_FLOAT:
+                    return parseFloat(value);
+                case DataManipulate.ENCODE_BOOLEAN:
+                    return value == 'true';
+                case DataManipulate.ENCODE_UNDEFINED:
+                    return undefined;
+            }
+        }
+        return decoded;
+    }
 
 }
