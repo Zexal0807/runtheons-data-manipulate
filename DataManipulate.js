@@ -1,34 +1,42 @@
 module.exports = new class DataManipulate {
 
-    static ENCODE_TAG = "runtheonsEncoder";
+    static ENCODE_ARRAY = "runtheonsArray"
+    static ENCODE_OBJECT = "runtheonsObject";
 
-    encode(data) {
-        var encoded = {};
-        if (typeof data == "object") {
-            Object.keys(data).forEach(k => {
-                var value = data[k];
-                var encodedValue;
+    encode(value) {
                 switch (typeof value) {
                     case 'object':
-                        encodedValue = this.encode(value);
-                        break;
-                    case 'array':
-                        break;
+                var encoded = {};
+                //For object and array
+                if (Array.isArray(value)) {
+                    var i = 0;
+                    value.forEach(e => {
+                        encoded[i] = this.encode(e);
+                        i++
+                    });
+                    this.addEncodeTag(encoded, DataManipulate.ENCODE_ARRAY);
+                } else {
+                    Object.keys(value).forEach(k => {
+                        encoded[k] = this.encode(value[k]);
+                    });
+                    this.addEncodeTag(encoded, DataManipulate.ENCODE_OBJECT);
+                }
+                return encoded;
                     case 'string':
-                        encodedValue = this.encodeString(value);
-                        break;
-                    case 'null':
-                        encodedValue = this.encodeNull();
-                        break;
+                return this.encodeString(value);
                     case 'undefined':
-                        encodedValue = this.encodeUndefined();
-                        break;
+                return this.encodeUndefined();
                     case 'boolean':
-                        encodedValue = this.encodeBoolean(value);
-                        break;
+                return this.encodeBoolean(value);
                     case 'number':
-                        encodedValue = this.encodeNumber(value);
-                        break;
+                return this.encodeNumber(value);
+        }
+    }
+
+    addEncodeTag(data, tag) {
+        data['runtheonsManipulate'] = tag;
+    }
+
                 }
                 encoded[k] = encodedValue;
             });
