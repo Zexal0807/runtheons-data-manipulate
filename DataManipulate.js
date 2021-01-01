@@ -37,8 +37,27 @@ module.exports = new class DataManipulate {
         data['runtheonsManipulate'] = tag;
     }
 
+    static ENCODE_STRING = "S";
+    static ENCODE_BOOLEAN = "B";
+    static ENCODE_UNDEFINED = "U";
+    static ENCODE_INTEGER = "I";
+    static ENCODE_FLOAT = "F";
+
+    encodeString(value) {
+        return value + DataManipulate.ENCODE_STRING;
+    }
+    encodeBoolean(value) {
+        return value + DataManipulate.ENCODE_BOOLEAN;
                 }
-                encoded[k] = encodedValue;
+    encodeNumber(value) {
+        if (Number.isInteger(value))
+            return value + DataManipulate.ENCODE_INTEGER;
+        else
+            return value + DataManipulate.ENCODE_FLOAT;
+    }
+    encodeUndefined() {
+        return DataManipulate.ENCODE_UNDEFINED;
+    }
             });
         }
         addEncodeTag(data);
