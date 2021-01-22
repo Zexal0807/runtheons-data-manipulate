@@ -1,9 +1,11 @@
+const DataManipulate = require("./DataManipulate");
+
 module.exports = new class {
 	encode(data) {
-		return JSON.stringify(data);
+		return DataManipulate.encode(data);
 	}
 
 	decode(data) {
-		return JSON.parse(data);
+		return DataManipulate.decode(data);
 	}
 }
